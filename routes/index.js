@@ -4,7 +4,7 @@ var path = require('path')
 var fs = require('fs')
 var os = require('os')
 var child_process = require('child_process')
-var downLoadDir = 下载好的文件在这里
+var downLoadDir = "下载好的文件在这里"
 var downLoadRoot = path.join(__dirname, '..', downLoadDir)
 
 var chat = io
