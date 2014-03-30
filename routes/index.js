@@ -4,7 +4,8 @@ var path = require('path')
 var fs = require('fs')
 var os = require('os')
 var child_process = require('child_process')
-var downLoadRoot = path.join(__dirname, '..', '下载好的文件在这里')
+var downLoadDir = 下载好的文件在这里
+var downLoadRoot = path.join(__dirname, '..', downLoadDir)
 
 var chat = io
     .of('/huaban')
@@ -19,7 +20,9 @@ var chat = io
 
         socket.on('open-download-directory', function () {
             var isWin = os.type().toLowerCase().indexOf('windows') > -1
-            child_process.spawn(isWin ? 'start' : 'open', [downLoadRoot]);
+            child_process.exec((isWin ? 'start' : 'open') + ' ' + downLoadDir, {
+                cwd: path.dirname(downLoadRoot)
+            });
         })
 
     })
