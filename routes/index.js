@@ -72,11 +72,16 @@ function loadAllPin(baseurl, currentId, fileArr, socket) {
             try {
                 var data = JSON.parse(body)
                 data.user.pins.forEach(function (obj) {
+                    var date = new Date(parseInt(obj.created_at, 10) * 1000)
                     fileArr.push({
                         board: trim(obj.board.title),
                         key: obj.file.key,
                         type: obj.file.type,
-                        text: trim(obj.raw_text)
+                        text: trim(obj.raw_text) + '-' + date.getFullYear() + '年' +
+                            (date.getMonth() + 1) + '月' +
+                            date.getDay() + '日' +
+                            date.getHours() + '点' +
+                            date.getMinutes() + '分'
                     })
                 })
                 if (data.user.pins.length >= 20) {
