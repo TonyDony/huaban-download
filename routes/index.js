@@ -22,6 +22,8 @@ var http = require('http')
 var openDirector
 
 function trim(str) {
+    if (!str) return 'null'
+    if (str.length > 200) str = str.substring(0, 200)
     return str.replace(/[\s\\\/'"|_?<>:*]/gi, '')
 }
 

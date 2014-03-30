@@ -92,6 +92,12 @@
             padding: 0;
         }
 
+        ul li {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
         .progress {
             text-align: center;
             color: #fff;
@@ -126,7 +132,7 @@
         </div>
         <div class="col-md-5">
             <h6>失败 <span class="badge J-error-badge">0</span></h6>
-            <ul class="J-error-list col-md-5">
+            <ul class="J-error-list">
             </ul>
         </div>
     </div>
