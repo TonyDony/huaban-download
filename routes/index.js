@@ -41,12 +41,13 @@ function loadPageSource(url, socket) {
 }
 
 
+//读取画集的所有JSON数据
 function loadAllPin(baseurl, currentId, fileArr, socket) {
 
     if (!fileArr) fileArr = []
 
     function _loadAllPin(currentId) {
-        socket.emit('process', {msg: '已获取到' + fileArr.length + '张图片'})
+        socket.emit('load pins', {count: (fileArr.length + 1)})
 
         var url = baseurl + '?htcvzojp&max=' + currentId + '&limit=20&wfl=1'
         request({
@@ -86,11 +87,14 @@ function loadAllPin(baseurl, currentId, fileArr, socket) {
 
 }
 
+//JSON抓取完毕，开始建立文件夹
 function done(fileArr, socket) {
-    socket.emit('process', {msg: '数据加载完毕，您一共有' + fileArr.length + '个图片,开始下载'})
+    socket.emit('process', {msg: '数据加载完毕，您一共有' + (fileArr.length + 1) + '个图片,开始下载'})
     createDir(fileArr, socket)
 }
 
+
+//根据分类创建好文件夹
 function createDir(fileArr, socket) {
 
     var dirName = []
@@ -109,16 +113,21 @@ function createDir(fileArr, socket) {
     })
 }
 
+
 function download(fileArr, socket) {
-    socket.emit('process', {msg: '开始下载图片'})
 
+    //储存总的图片数量
+    var allCount = fileArr.length + 1
+    console.log(fileArr)
 
-    console.log(fileArr, '123123')
+    var downloadErrorCount = 0
+    var downloadSuccessCount = 0
+
 
     function _download() {
         var current = fileArr.shift()
         if (!current) {
-            socket.emit('process', {msg: '下载完毕'})
+            socket.emit('process', {msg: '所有图片下载完毕', left: 0, sum: allCount})
             return
         }
         var type = current.type.substring(current.type.indexOf('/') + 1)
@@ -126,19 +135,32 @@ function download(fileArr, socket) {
         var filePath = path.join(downLoadRoot, current.board, fileName)
 
         var url = 'http://img.hb.aicdn.com/' + current.key
-        socket.emit('process', {msg: '开始下载：' + fileName})
         request({url: url, encoding: null}, function (error, response, body) {
             if (!error && response.statusCode == 200) {
-                console.log(typeof body)
                 fs.writeFile(filePath, body, function (err) {
                     if (err) {
-                        socket.emit('process', {msg: '错误：' + fileName + '下载失败'})
+                        socket.emit('download error', {
+                            msg: '错误：' + fileName + '下载失败'
+                        })
+                        downloadErrorCount++
                     } else {
-                        socket.emit('process', {msg: '下载成功' + fileName})
+                        socket.emit('download success', {
+                            msg: '下载成功' + fileName
+                        })
+                        downloadSuccessCount++
                     }
-                    socket.emit('process', {msg: '还剩下' + fileArr.length + '张图片'})
+
+                    socket.emit('process', {
+                        msg: '还剩下' + (fileArr.length + 1) + '张图片',
+                        left: fileArr.length,
+                        successCount: downloadSuccessCount,
+                        errorCount: downloadErrorCount,
+                        sum: allCount
+                    })
                     _download(fileArr)
                 });
+            } else {
+                _download(fileArr)
             }
         })
     }
