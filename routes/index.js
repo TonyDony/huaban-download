@@ -2,6 +2,8 @@ var io = require('socket.io').listen(3001)
 var request = require('request')
 var path = require('path')
 var fs = require('fs')
+var os = require('os')
+var child_process = require('child_process')
 var downLoadRoot = path.join(__dirname, '..', '下载好的文件在这里')
 
 var chat = io
@@ -14,6 +16,12 @@ var chat = io
         socket.on('start download', function (data) {
             loadPageSource(data.url, socket)
         })
+
+        socket.on('open-download-directory', function () {
+            var isWin = os.type().toLowerCase().indexOf('windows') > -1
+            child_process.spawn(isWin ? 'start' : 'open', [downLoadRoot]);
+        })
+
     })
 
 var http = require('http')

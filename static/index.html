@@ -177,7 +177,7 @@
     $('.J-open-download-directory').on('click', function (ev) {
         ev.preventDefault()
         $(this).toggleClass('checked')
-        socket.emit('open-download-directory', {"boolean": $(this).hasClass('checked')})
+        socket.emit('open-download-directory', {})
     })
 
     $('.download-btn').on('click', function (ev) {
