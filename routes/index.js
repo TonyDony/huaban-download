@@ -22,10 +22,7 @@ var http = require('http')
 var openDirector
 
 function trim(str) {
-    var newStr = str;
-    if (!newStr) return '图片'
-    newStr = newStr.replace(/[\s\\\/'"|_?<>:*]/gi, '')
-    if (!newStr) return '图片'
+    return str.replace(/[\s\\\/'"|_?<>:*]/gi, '')
 }
 
 function loadPageSource(url, socket) {
@@ -49,6 +46,8 @@ function loadAllPin(baseurl, currentId, fileArr, socket) {
     if (!fileArr) fileArr = []
 
     function _loadAllPin(currentId) {
+        socket.emit('process', {msg: '已获取到' + fileArr.length + '张图片'})
+
         var url = baseurl + '?htcvzojp&max=' + currentId + '&limit=20&wfl=1'
         request({
             url: url,
@@ -58,7 +57,6 @@ function loadAllPin(baseurl, currentId, fileArr, socket) {
                 'X-Requested-With': 'XMLHttpRequest'
             }
         }, function (error, response, body) {
-            socket.emit('process', {msg: '正在抓取网页' + url})
             if (error) console.log('抓取网页发生错误', error)
             try {
                 var data = JSON.parse(body)
@@ -71,13 +69,14 @@ function loadAllPin(baseurl, currentId, fileArr, socket) {
                     })
                 })
                 if (data.user.pins.length >= 20) {
-                    socket.emit('process', {msg: '还存在数据，继续抓取' + url})
                     _loadAllPin(data.user.pins[data.user.pins.length - 1].pin_id)
                 } else {
                     done(fileArr, socket)
                 }
             } catch (e) {
+                console.log('加载失败，开始重复加载' + currentId)
                 console.log(e)
+                done(fileArr, socket)
             }
         });
 
@@ -113,6 +112,9 @@ function createDir(fileArr, socket) {
 function download(fileArr, socket) {
     socket.emit('process', {msg: '开始下载图片'})
 
+
+    console.log(fileArr, '123123')
+
     function _download() {
         var current = fileArr.shift()
         if (!current) {
@@ -124,7 +126,7 @@ function download(fileArr, socket) {
         var filePath = path.join(downLoadRoot, current.board, fileName)
 
         var url = 'http://img.hb.aicdn.com/' + current.key
-        socket.emit('process', {msg: '文件名：' + fileName + '保存路径：' + filePath})
+        socket.emit('process', {msg: '开始下载：' + fileName})
         request({url: url, encoding: null}, function (error, response, body) {
             if (!error && response.statusCode == 200) {
                 console.log(typeof body)
@@ -132,8 +134,9 @@ function download(fileArr, socket) {
                     if (err) {
                         socket.emit('process', {msg: '错误：' + fileName + '下载失败'})
                     } else {
-                        socket.emit('process', {msg: fileName + '保存成功'})
+                        socket.emit('process', {msg: '下载成功' + fileName})
                     }
+                    socket.emit('process', {msg: '还剩下' + fileArr.length + '张图片'})
                     _download(fileArr)
                 });
             }

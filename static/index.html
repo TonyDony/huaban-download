@@ -51,9 +51,11 @@
             -webkit-filter: grayscale(0%);
         }
 
-        #output {
-            height: 300px;
+        #result {
+            height: 200px;
             overflow: auto;
+            font-family: simsun, "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-size: 12px;
         }
 
         textarea {
@@ -82,8 +84,10 @@
 <script src="./assets/socket.io.min.js"></script>
 <script>
     var socket = io.connect('http://localhost:3001/huaban');
+    var result = document.getElementById('result')
     socket.on('process', function (data) {
-        document.getElementById('result').appendChild(document.createTextNode(data.msg + '\r\n'))
+        result.appendChild(document.createTextNode(data.msg + '\r\n'))
+        result.scrollTop = result.scrollHeight
     });
     var $ = jQuery
     $('.J-after-open-explorer').on('click', function (ev) {
@@ -94,7 +98,7 @@
 
     $('.download-btn').on('click', function (ev) {
         console.log($('#pins-url').val())
-        document.getElementById('result').innerHTML = ''
+        result.innerHTML = ''
         socket.emit('start download', {url: $('#pins-url').val()})
     })
 
