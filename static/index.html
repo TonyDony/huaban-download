@@ -56,6 +56,9 @@
             overflow: auto;
         }
 
+        textarea {
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
@@ -64,7 +67,7 @@
 <div class="container">
     <h3>花瓣个人画集批量下载</h3>
 
-    <p class="control-group"><input type="text" class="form-control" placeholder="粘贴个人画集的网址"
+    <p class="control-group"><input type="text" id="pins-url" class="form-control" placeholder="粘贴个人画集的网址"
                                     value="http://huaban.com/mcbe4rtvcv/pins/"/></p>
 
     <p><a href="#" class="after-open-explorer J-after-open-explorer"><span></span>完成后，打开下载目录</a></p>
@@ -73,25 +76,26 @@
     <script src="https://a.alipayobjects.com/jquery/jquery/1.10.1/jquery.js"></script>
 
 
-    <div id="output">
-        <dl>
-            <dt>sadf</dt>
-            <dd>asdfasd</dd>
-        </dl>
-    </div>
+    <textarea id="result" class="form-control" cols="30" rows="10"></textarea>
 </div>
 <script src="https://a.alipayobjects.com/jquery/jquery/1.10.1/jquery.js"></script>
 <script src="./assets/socket.io.min.js"></script>
 <script>
-    var socket = io.connect('http://localhost:3000');
-    socket.on('news', function (data) {
-        socket.emit('my other event', { my: 'data' });
+    var socket = io.connect('http://localhost:3001/huaban');
+    socket.on('process', function (data) {
+        document.getElementById('result').appendChild(document.createTextNode(data.msg + '\r\n'))
     });
     var $ = jQuery
     $('.J-after-open-explorer').on('click', function (ev) {
         ev.preventDefault()
         $(this).toggleClass('checked')
         socket.emit('after-open-download-directory', {"boolean": $(this).hasClass('checked')})
+    })
+
+    $('.download-btn').on('click', function (ev) {
+        console.log($('#pins-url').val())
+        document.getElementById('result').innerHTML = ''
+        socket.emit('start download', {url: $('#pins-url').val()})
     })
 
 </script>
