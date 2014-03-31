@@ -33,33 +33,6 @@
             border-color: #ff6962;
         }
 
-        a.after-open-explorer {
-            font-size: 14px;
-            filter: progid:DXImageTransform.Microsoft.BasicImage(grayscale=1);
-            -webkit-filter: grayscale(100%);
-        }
-
-        a.after-open-explorer span {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            background: url(huaban.png);
-            background-size: 100% 100%;
-            vertical-align: -3px;
-            margin-right: 5px;
-            opacity: .4;
-        }
-
-        a.after-open-explorer.checked {
-            opacity: 1;
-            filter: progid:DXImageTransform.Microsoft.BasicImage(grayscale=1);
-            -webkit-filter: grayscale(0%);
-        }
-
-        textarea {
-            font-size: 12px;
-        }
-
         .progress, .ui-slider {
             height: auto;
         }
@@ -69,7 +42,8 @@
         }
 
         #pins-url {
-            padding: 23px 5px;
+            height: 42px;
+            line-height: normal;
             font-size: 18px;
             color: #555;
             margin: 0;
@@ -115,8 +89,7 @@
     <h3>花瓣个人画集批量下载</h3>
 
     <p class="control-group"><input type="text" id="pins-url" class="form-control input-block-level"
-                                    placeholder="粘贴个人画集的网址"
-                                    value="http://huaban.com/mcbe4rtvcv/pins/"/></p>
+                                    placeholder="粘贴个人画集的网址" value="http://huaban.com/mcbe4rtvcv/pins/"/></p>
 
     <p><a href="#" class="after-open-explorer J-open-download-directory">打开下载目录</a></p>
 

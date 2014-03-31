@@ -3,9 +3,12 @@ var request = require('request')
 var path = require('path')
 var fs = require('fs')
 var os = require('os')
+var isWin = os.type().toLowerCase().indexOf('windows') > -1
 var child_process = require('child_process')
 var downLoadDir = "下载好的文件在这里"
 var downLoadRoot = path.join(__dirname, '..', downLoadDir)
+
+child_process.exec((isWin ? 'start' : 'open') + ' http://localhost:3000');
 
 var chat = io
     .of('/huaban')
@@ -19,7 +22,6 @@ var chat = io
         })
 
         socket.on('open-download-directory', function () {
-            var isWin = os.type().toLowerCase().indexOf('windows') > -1
             child_process.exec((isWin ? 'start' : 'open') + ' ' + downLoadDir, {
                 cwd: path.dirname(downLoadRoot)
             });
@@ -28,9 +30,6 @@ var chat = io
     })
 
 var http = require('http')
-
-//完成后是否打开目录
-var openDirector
 
 function trim(str) {
     if (!str) return 'null'
@@ -107,7 +106,6 @@ function loadAllPin(baseurl, currentId, fileArr, socket) {
 
 //JSON抓取完毕，开始建立文件夹
 function done(fileArr, socket) {
-    socket.emit('process', {msg: '数据加载完毕，您一共有' + (fileArr.length + 1) + '个图片,开始下载'})
     createDir(fileArr, socket)
 }
 
@@ -121,14 +119,32 @@ function createDir(fileArr, socket) {
             dirName.push(item.board)
         }
     })
-    socket.emit('process', {msg: '开始创建文件夹：' + dirName.join(',')})
-    var spawn = require('child_process').spawn,
-        ls = spawn('mkdir', dirName, {
-            cwd: downLoadRoot
-        });
-    ls.on('close', function (code) {
-        download(fileArr, socket)
-    })
+
+    function _mkdir() {
+        var currentDir = dirName.shift()
+        if (!currentDir) {
+            socket.emit('download success', {
+                msg: '文件夹创建完毕'
+            })
+            download(fileArr, socket)
+            return
+        }
+        fs.mkdir(path.join(downLoadRoot, currentDir), function (err) {
+            if (err) {
+                socket.emit('download error', {
+                    msg: currentDir + '创建失败'
+                })
+            } else {
+                socket.emit('download success', {
+                    msg: currentDir + '创建成功'
+                })
+            }
+            _mkdir()
+        })
+    }
+
+    _mkdir()
+
 }
 
 
@@ -178,6 +194,9 @@ function download(fileArr, socket) {
                     _download(fileArr)
                 });
             } else {
+                socket.emit('download error', {
+                    msg: '下载失败：' + fileName
+                })
                 _download(fileArr)
             }
         })
